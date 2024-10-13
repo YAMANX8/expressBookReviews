@@ -12,8 +12,7 @@ public_users.post("/register", (req, res) => {
       .status(400)
       .json({ message: "username and password are required" });
 
-  const userExists = users.some((user) => user.username === username);
-  if (userExists)
+  if (isValid(username))
     return res.status(400).json({ message: "Username already exists" });
 
   users.push({ username, password });
