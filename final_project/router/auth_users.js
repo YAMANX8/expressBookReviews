@@ -4,7 +4,6 @@ let books = require("./booksdb.js");
 const regd_users = express.Router();
 
 let users = [];
-const secretKey = "Yaman.js";
 
 const isValid = (username) => {
   return users.some((user) => user.username === username);
@@ -26,7 +25,7 @@ regd_users.post("/login", (req, res) => {
   }
 
   if (authenticatedUser(username, password)) {
-    const accessToken = jwt.sign({ data: password }, secretKey, {
+    const accessToken = jwt.sign({ data: password }, "Yaman.js", {
       expiresIn: "1h",
     });
 
@@ -45,8 +44,22 @@ regd_users.post("/login", (req, res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented" });
+  const { isbn } = req.params;
+  const { review } = req.query;
+  let username = req.session.authorization["username"];
+
+  if (!books[isbn]) {
+    return res.status(404).json({ message: "Book not found" });
+  }
+
+  books[isbn].reviews[username] = review;
+
+  return res
+    .status(200)
+    .json({
+      message: "Review added/modified successfully",
+      review: books[isbn].reviews[username],
+    });
 });
 
 module.exports.authenticated = regd_users;
