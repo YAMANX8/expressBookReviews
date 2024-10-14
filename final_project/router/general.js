@@ -20,9 +20,37 @@ public_users.post("/register", (req, res) => {
 });
 
 // Get the book list available in the shop
-public_users.get("/", function (req, res) {
-  return res.status(200).json(books);
+public_users.get("/", async (req, res) => {
+  try {
+    return res.status(200).json(books);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error retrieving books", error: error.message });
+  }
 });
+
+// public_users.get("/", (req, res) => {
+//   let bookList = new Promise((resolve, reject) => {
+//     try {
+//       resolve(books);
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+
+//   return bookList
+//     .then((books) => res.status(200).json(books))
+//     .catch((error) =>
+//       res
+//         .status(500)
+//         .json({ message: "Error retrieving books", error: error.message })
+//     );
+// });
+
+// public_users.get("/", function (req, res) {
+//   return res.status(200).json(books);
+// });
 
 // Get book details based on ISBN
 public_users.get("/isbn/:isbn", function (req, res) {
