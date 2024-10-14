@@ -30,6 +30,7 @@ public_users.get("/", async (req, res) => {
   }
 });
 
+// refactored
 // public_users.get("/", (req, res) => {
 //   let bookList = new Promise((resolve, reject) => {
 //     try {
@@ -53,13 +54,30 @@ public_users.get("/", async (req, res) => {
 // });
 
 // Get book details based on ISBN
-public_users.get("/isbn/:isbn", function (req, res) {
+public_users.get("/isbn/:isbn", (req, res) => {
   const isbn = req.params.isbn;
-  if (!books[isbn]) {
-    return res.status(404).json({ message: "Book not found" });
-  }
-  return res.status(200).json(books[isbn]);
+  let foundBook = new Promise((resolve, reject) => {
+    try {
+      if (!books[isbn]) reject({ message: "Book not found", status: 404 });
+      resolve(books[isbn]);
+    } catch (error) {
+      reject({ message: `server error: ${error}`, status: 500 });
+    }
+  });
+
+  return foundBook
+    .then((book) => res.status(200).json(book))
+    .catch((err) => res.status(err.status).json({ message: err.message }));
 });
+
+// refactored
+// public_users.get("/isbn/:isbn", (req, res) => {
+//   const isbn = req.params.isbn;
+//   if (!books[isbn]) {
+//     return res.status(404).json({ message: "Book not found" });
+//   }
+//   return res.status(200).json(books[isbn]);
+// });
 
 // Get book details based on author
 public_users.get("/author/:author", function (req, res) {
