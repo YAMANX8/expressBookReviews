@@ -80,17 +80,42 @@ public_users.get("/isbn/:isbn", (req, res) => {
 // });
 
 // Get book details based on author
-public_users.get("/author/:author", function (req, res) {
+public_users.get("/author/:author", (req, res) => {
   const { author } = req.params;
+  let foundBooks = new Promise((resolve, reject) => {
+    try {
+      const booksByAuthor = Object.values(books).filter((book) =>
+        book.author.toLowerCase().includes(author.toLowerCase())
+      );
 
-  const booksByAuthor = Object.values(books).filter((book) =>
-    book.author.toLowerCase().includes(author.toLowerCase())
-  );
+      if (booksByAuthor.length > 0) resolve(booksByAuthor);
+      else
+        reject({
+          message: "No books found by this author",
+          status: 404,
+        });
+    } catch (error) {
+      reject({ message: `server error: ${error}`, status: 500 });
+    }
+  });
 
-  if (booksByAuthor.length > 0) return res.status(200).json(booksByAuthor);
-  else
-    return res.status(404).json({ message: "No books found by this author" });
+  return foundBooks
+    .then((books) => res.status(200).json(books))
+    .catch((err) => res.status(err.status).json({ message: err.message }));
 });
+
+// refactored
+// public_users.get("/author/:author", function (req, res) {
+//   const { author } = req.params;
+
+//   const booksByAuthor = Object.values(books).filter((book) =>
+//     book.author.toLowerCase().includes(author.toLowerCase())
+//   );
+
+//   if (booksByAuthor.length > 0) return res.status(200).json(booksByAuthor);
+//   else
+//     return res.status(404).json({ message: "No books found by this author" });
+// });
 
 // Get all books based on title
 public_users.get("/title/:title", function (req, res) {
